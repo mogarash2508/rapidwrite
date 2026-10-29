@@ -1,0 +1,26 @@
+# Python & Temp files
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+ACTIVE_TUNNEL_LINK.txt
+ACTIVE_TUNNEL_LINK.json
+
+# Flutter & Dart artifacts
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# IDE and OS files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Brain & Agentic artifacts
+.system_generated/
+scratch/

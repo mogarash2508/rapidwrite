@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+  <title>Stylus Handwriting Evaluator — Rapid Write</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="tesseract.min.js"></script>
+</head>
+<body class="dark-theme">
+  <div class="app-container">
+
+    <!-- 1. TOP HEADER (Aurora Ink, Title, Live Timer at Top Right, Settings) -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="badge-aurora">
+          <span class="aurora-sparkle">✦</span>
+          <span>Aurora Ink</span>
+        </div>
+        <div class="title-wrap">
+          <h1>Stylus Handwriting Evaluator</h1>
+          <p class="subtitle">Tablet-optimized calligraphy & kinematics assessment</p>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <!-- Live Countdown / Elapsed Timer placed at TOP -->
+        <div class="timer-badge-top" id="topTimerBadge" title="Timer starts automatically on first pen stroke">
+          <span class="timer-icon">⏱</span>
+          <span class="timer-digits" id="topTimerDigits">00:00.0</span>
+        </div>
+
+        <!-- Settings Gear Button -->
+        <button type="button" class="btn-icon-gear" id="btnSettings" title="Studio Settings & Diagnostics">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. CATEGORY / LENGTH SELECTOR (Monkeytype Style) -->
+    <nav class="category-nav-bar" aria-label="Practice Categories">
+      <div class="category-pill-group">
+        <button type="button" class="cat-pill" data-cat="punctuation">
+          <span class="cat-prefix">@</span> punctuation
+        </button>
+        <button type="button" class="cat-pill" data-cat="numbers">
+          <span class="cat-prefix">#</span> numbers
+        </button>
+        <button type="button" class="cat-pill" data-cat="time">
+          <span class="cat-prefix">⏱</span> time
+        </button>
+        <button type="button" class="cat-pill active" data-cat="words">
+          <span class="cat-prefix">Tt</span> words
+        </button>
+        <button type="button" class="cat-pill" data-cat="quote">
+          <span class="cat-prefix">“</span> quote
+        </button>
+        <button type="button" class="cat-pill" data-cat="zen">
+          <span class="cat-prefix">☯</span> zen
+        </button>
+        <button type="button" class="cat-pill" data-cat="custom">
+          <span class="cat-prefix">✎</span> custom
+        </button>
+      </div>
+
+      <div class="cat-vdivider"></div>
+
+      <div class="length-pill-group">
+        <button type="button" class="len-pill" data-len="10">10</button>
+        <button type="button" class="len-pill active" data-len="25">25</button>
+        <button type="button" class="len-pill" data-len="50">50</button>
+      </div>
+    </nav>
+
+    <!-- 3. TARGET PRACTICE PROMPT CARD -->
+    <section class="target-prompt-card" id="targetPromptCard">
+      <div class="prompt-icon-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+          <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+          <path d="M2 2l7.586 7.586"></path>
+          <circle cx="11" cy="11" r="2"></circle>
+        </svg>
+      </div>
+
+      <div class="prompt-content-wrap">
+        <div class="prompt-meta-header">
+          <span class="prompt-title-tag">TARGET PRACTICE PROMPT</span>
+          <span class="prompt-metrics-tag" id="promptMetricsTag">7 words • 44 chars • <span class="timing-highlight" id="promptTimingText">Timing (0 strokes)</span></span>
+        </div>
+        <div class="prompt-sentence-display" id="targetSentenceText">
+          Woven silk pyjamas exchanged for blue quartz
+        </div>
+        <!-- Disappearance notice banner (Completely replaces the sentence when time expires) -->
+        <div class="prompt-expired-completely hidden" id="promptExpiredNote">
+          <div class="expired-lock-icon">🔒</div>
+          <div class="expired-content">
+            <strong>PROMPT TIME EXPIRED — SENTENCE DISAPPEARED</strong>
+            <p>Target sentence is hidden! Continue writing the remainder from memory.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-actions-wrap">
+        <button type="button" class="btn-shuffle" id="btnShufflePrompt" title="Load next practice sentence">
+          <span class="icon-shuffle">↻</span>
+          <span>Shuffle</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. STREAMLINED RESULT ANALYSIS CARD (Matching Speaker's Reference) -->
+    <section class="result-analysis-card" id="resultAnalysisCard">
+      <div class="result-card-header">
+        <div class="header-tag-group">
+          <div class="analysis-icon-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <h2 class="analysis-title">RESULT ANALYSIS</h2>
+          <span class="engine-badge" id="recognitionEngineBadge">Google Digital Ink (Web Engine)</span>
+        </div>
+
+        <div class="header-action-group">
+          <button type="button" class="btn-card-ctrl" id="btnExpandResults" title="Toggle Fullscreen / Compact View">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <polyline points="9 21 3 21 3 15"></polyline>
+              <line x1="21" y1="3" x2="14" y2="10"></line>
+              <line x1="3" y1="21" x2="10" y2="14"></line>
+            </svg>
+          </button>
+          <button type="button" class="btn-card-ctrl" id="btnCloseResults" title="Dismiss Results">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4 High-Impact Metric Cards: WPM | DURATION | ACCURACY | AESTHETIC -->
+      <div class="metrics-four-cards">
+        <!-- Metric 1: WPM -->
+        <div class="metric-card card-speed">
+          <div class="metric-head">
+            <span class="icon-stat icon-bolt">⚡</span>
+            <span class="metric-label">WPM</span>
+          </div>
+          <div class="metric-value-wrap">
+            <span class="metric-big-num" id="resSpeedValue">25.0</span>
+            <span class="metric-unit">WPM</span>
+          </div>
+          <div class="metric-footer-note" id="resSpeedSub">125 CPM</div>
+        </div>
+
+        <!-- Metric 2: DURATION (Grounded Temporal Gating Model) -->
+        <div class="metric-card card-duration">
+          <div class="metric-head">
+            <span class="icon-stat icon-timer">⏱</span>
+            <span class="metric-label">DURATION</span>
+          </div>
+          <div class="metric-value-wrap">
+            <span class="metric-big-num color-cyan" id="resDurationValue">24.70</span>
+            <span class="metric-unit color-cyan">s</span>
+          </div>
+          <div class="metric-footer-note" id="resDurationSub">Contact: 16.2s • In-Air: 8.5s</div>
+        </div>
+
+        <!-- Metric 3: Accuracy -->
+        <div class="metric-card card-accuracy">
+          <div class="metric-head">
+            <span class="icon-stat icon-check">✔</span>
+            <span class="metric-label">ACCURACY</span>
+          </div>
+          <div class="metric-value-wrap">
+            <span class="metric-big-num color-green" id="resAccuracyValue">82</span>
+            <span class="metric-unit color-green">%</span>
+          </div>
+          <div class="metric-footer-note" id="resAccuracySub">36 / 44 characters matched</div>
+        </div>
+
+        <!-- Metric 4: Aesthetic -->
+        <div class="metric-card card-aesthetic">
+          <div class="metric-head">
+            <span class="icon-stat icon-chart">📈</span>
+            <span class="metric-label">AESTHETIC</span>
+          </div>
+          <div class="metric-value-wrap">
+            <span class="metric-big-num color-amber" id="resAestheticGrade">C+</span>
+            <span class="metric-unit color-amber" id="resAestheticScore">Grade (69/100)</span>
+          </div>
+          <div class="metric-footer-note" id="resAestheticSub">Fluid curvature & rhythm</div>
+        </div>
+      </div>
+
+      <!-- Recognized Text Strip -->
+      <div class="recognized-text-bar">
+        <span class="rec-symbol">Tt</span>
+        <span class="rec-content">
+          Recognized: <strong id="resRecognizedText">"Woven Silk pyjamas enchanged for bloat"</strong>
+        </span>
+      </div>
+
+      <!-- Next Sentence Button -->
+      <div class="result-card-footer">
+        <button type="button" class="btn-next-sentence" id="btnNextSentence">
+          <span>Next Sentence</span>
+          <span class="arrow-icon">›</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 5. ACTION BAR (Start, Clear Canvas, Live Telemetry, Hide Results, Stop & Analyze) -->
+    <!-- Positioned ABOVE the notepad so the bottom is completely free! -->
+    <section class="canvas-action-bar">
+      <div class="action-bar-left">
+        <!-- 1. Start Button: Step 1 Arming State (Timer held stationary at 00:00.0) -->
+        <button type="button" class="btn-action-start" id="btnStartSession" title="Step 1: Arm writing session. Timer starts on first pen stroke.">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span id="lblStartSession">Start</span>
+        </button>
+
+        <button type="button" class="btn-action-clear" id="btnClearCanvas">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Clear Canvas</span>
+        </button>
+
+        <div class="telemetry-pill-active" id="telemetryPill">
+          <span class="pulse-dot"></span>
+          <span id="statStrokesPill">0 strokes</span>
+          <span class="pill-sep">•</span>
+          <span id="statTimePill">0.0s</span>
+        </div>
+      </div>
+
+      <div class="action-bar-right">
+        <button type="button" class="btn-toggle-results" id="btnToggleResults">
+          <span class="eye-icon">👁</span>
+          <span id="lblToggleResults">Hide Results</span>
+        </button>
+
+        <!-- 5. Stop & Analyze Button: Step 5 Duration = T_last - T_first -->
+        <button type="button" class="btn-submit-analyze" id="btnSubmitAnalyze" disabled title="Step 5: Stop recording and compute Writing Duration = T_last - T_first">
+          <span class="rocket-icon">⏹</span>
+          <span id="lblSubmitAnalyze">Stop &amp; Analyze</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 6. CANVAS TOOLBAR (Pen, Eraser, Sizes, Colors, Paper Type, Palm Guard, Undo/Redo) -->
+    <section class="canvas-toolbar">
+      <div class="toolbar-left">
+        <!-- Pen & Eraser Mode Toggle -->
+        <div class="tool-switch">
+          <button type="button" class="tool-btn active" id="btnToolPen">
+            <span class="tool-icon">✏</span>
+            <span>Pen</span>
+          </button>
+          <button type="button" class="tool-btn" id="btnToolEraser">
+            <span class="tool-icon">⌧</span>
+            <span>Eraser</span>
+          </button>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <!-- Stroke Width Dots -->
+        <div class="stroke-size-selector" aria-label="Stroke Thickness">
+          <button type="button" class="size-dot sm" data-size="2" title="Fine (2px)">•</button>
+          <button type="button" class="size-dot md active" data-size="4" title="Medium (4px)">●</button>
+          <button type="button" class="size-dot lg" data-size="7" title="Bold (7px)">⬤</button>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <!-- Color Swatches -->
+        <div class="color-palette" aria-label="Ink Color">
+          <button type="button" class="swatch-btn active" data-color="#1e293b" style="background-color: #1e293b;" title="Dark Charcoal"></button>
+          <button type="button" class="swatch-btn" data-color="#2563eb" style="background-color: #2563eb;" title="Royal Blue"></button>
+          <button type="button" class="swatch-btn" data-color="#10b981" style="background-color: #10b981;" title="Emerald Green"></button>
+          <button type="button" class="swatch-btn" data-color="#ef4444" style="background-color: #ef4444;" title="Crimson Red"></button>
+        </div>
+
+        <div class="tool-divider"></div>
+
+        <!-- Paper Selector Dropdown -->
+        <div class="dropdown-container">
+          <button type="button" class="btn-paper-select" id="btnPaperSelect">
+            <span>Paper</span>
+            <span class="dropdown-caret">▾</span>
+          </button>
+          <div class="paper-dropdown-menu hidden" id="paperMenu">
+            <button type="button" class="paper-option active" data-paper="ruled">Ruled Lined Paper</button>
+            <button type="button" class="paper-option" data-paper="grid">Grid Graph Paper</button>
+            <button type="button" class="paper-option" data-paper="blank">Blank White Paper</button>
+          </div>
+        </div>
+
+        <!-- Palm Guard Toggle Pill -->
+        <button type="button" class="btn-palm-guard active" id="btnPalmGuard" title="Strict Palm Rejection: Pen draws ink, finger scrolls vertically">
+          <span class="shield-icon">🛡</span>
+          <span>Palm Guard ON</span>
+        </button>
+      </div>
+
+      <div class="toolbar-right">
+        <!-- Undo & Redo -->
+        <div class="history-controls">
+          <button type="button" class="btn-history" id="btnUndo" title="Undo stroke (Ctrl+Z)" disabled>
+            <span>↶</span>
+          </button>
+          <button type="button" class="btn-history" id="btnRedo" title="Redo stroke (Ctrl+Y)" disabled>
+            <span>↷</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. NOTEPAD CANVAS WRITING AREA -->
+    <!-- 
+      SEPARATION OF STYLUS WRITING FROM TOUCH SCROLLING:
+      - touch-action: pan-y enables native, fluid vertical scrolling when touched by fingers / palms.
+      - Pointer events are inspected:
+        • 'pen' pointer events draw handwriting on the canvas and call preventDefault().
+        • 'touch' pointer events are NEVER drawn and DO NOT prevent default, allowing the student
+          to scroll the notepad vertically with their fingers effortlessly without leaving marks!
+    -->
+    <main class="notepad-scroll-container" id="notepadScrollContainer">
+      <div class="notepad-sheet-frame" id="notepadSheetFrame">
+        
+        <!-- Floating Top-Right Badge: Apple Pencil Only (Palm Guard ON) -->
+        <div class="canvas-floating-badge badge-top-right" id="badgeApplePencil">
+          <span class="stylus-dot-icon">✏</span>
+          <span id="lblInputStatus">Apple Pencil Only (Palm Guard ON)</span>
+        </div>
+
+        <!-- Floating Bottom-Left Badge: Stroke Counter -->
+        <div class="canvas-floating-badge badge-bottom-left" id="badgeStrokeCount">
+          <span>✍</span>
+          <span id="canvasStrokesLabel">0 strokes</span>
+        </div>
+
+        <!-- Guidelines Canvas (Ruled lines / Grid) -->
+        <canvas id="guideCanvas" class="sheet-canvas"></canvas>
+
+        <!-- Active Ink Drawing Canvas -->
+        <canvas id="drawCanvas" class="sheet-canvas"></canvas>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Settings & QR Modal -->
+  <div class="modal-overlay hidden" id="settingsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Studio Settings &amp; Telemetry</h3>
+        <button type="button" class="btn-modal-close" id="btnCloseModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="setting-item">
+          <div>
+            <strong>Strict Stylus-Only Palm Rejection</strong>
+            <p>Reject all finger touches from drawing (allows vertical touch scrolling)</p>
+          </div>
+          <input type="checkbox" id="chkStrictStylus" checked>
+        </div>
+        <div class="setting-item">
+          <div>
+            <strong>Show Ruled Notebook Lines</strong>
+            <p>Display calibrated writing guidelines on notepad</p>
+          </div>
+          <input type="checkbox" id="chkRuledLines" checked>
+        </div>
+        <div class="setting-item">
+          <div>
+            <strong>Desktop Mouse Debug Drawing</strong>
+            <p>Allow mouse clicks to draw when testing on desktop laptop</p>
+          </div>
+          <input type="checkbox" id="chkMouseDebug" checked>
+        </div>
+        <div class="qr-connection-box">
+          <strong>Connect iPad or Tablet:</strong>
+          <p>Scan to open this live session on your tablet via Cloudflare Tunnel:</p>
+          <img src="qr_code.png" alt="Cloudflare QR Code" class="modal-qr-img">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
