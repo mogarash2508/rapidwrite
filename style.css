@@ -422,16 +422,16 @@ html, body {
 /* ================= 4. STREAMLINED RESULT ANALYSIS CARD ================= */
 .result-analysis-card {
   background: linear-gradient(180deg, rgba(234, 88, 12, 0.08) 0%, rgba(13, 20, 36, 0.98) 100%);
-  border: 2px solid var(--accent-orange);
-  border-radius: 12px;
-  padding: 10px 14px;
-  box-shadow: 0 6px 20px rgba(234, 88, 12, 0.25);
+  border: 1.5px solid var(--accent-orange);
+  border-radius: 10px;
+  padding: 5px 12px 6px 12px;
+  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.2);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   flex-shrink: 0;
-  max-height: 220px;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   transition: all 0.3s ease;
 }
 
@@ -507,67 +507,69 @@ html, body {
 /* ================= OVERALL PERFORMANCE SCORE HERO ================= */
 .overall-performance-hero {
   background: linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(99, 102, 241, 0.12) 100%);
-  border: 1.5px solid rgba(249, 115, 22, 0.45);
-  border-radius: 10px;
-  padding: 8px 14px;
+  border: 1px solid rgba(249, 115, 22, 0.4);
+  border-radius: 7px;
+  padding: 4px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.15);
+  gap: 8px;
+  box-shadow: 0 2px 10px rgba(234, 88, 12, 0.12);
 }
 
 .overall-score-left {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .overall-hero-badge {
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   font-weight: 800;
   color: var(--accent-orange-bright);
   letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.1;
 }
 
 .overall-hero-score-row {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
 }
 
 .overall-score-big {
   font-family: var(--font-main);
-  font-size: clamp(1.6rem, 2.8vw, 2.1rem);
+  font-size: 1.35rem;
   font-weight: 900;
   color: #ffffff;
   line-height: 1;
-  text-shadow: 0 0 16px rgba(249, 115, 22, 0.4);
+  text-shadow: 0 0 12px rgba(249, 115, 22, 0.35);
 }
 
 .overall-score-max {
-  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  font-size: 0.85rem;
   font-weight: 800;
   color: var(--text-secondary);
 }
 
 .overall-score-sep {
-  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  font-size: 0.85rem;
   font-weight: 700;
   color: var(--text-muted);
-  margin: 0 4px;
+  margin: 0 3px;
 }
 
 .overall-badge-grade {
   background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
   color: #ffffff;
-  font-size: clamp(0.78rem, 1.2vw, 0.92rem);
+  font-size: 0.68rem;
   font-weight: 800;
-  padding: 3px 10px;
-  border-radius: 12px;
+  padding: 2px 8px;
+  border-radius: 10px;
   letter-spacing: 0.04em;
-  margin-left: 4px;
-  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.4);
+  margin-left: 3px;
+  box-shadow: 0 2px 8px rgba(234, 88, 12, 0.35);
 }
 
 .overall-breakdown-tags {
@@ -628,17 +630,17 @@ html, body {
 .metrics-four-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .metric-card {
   background: rgba(15, 23, 42, 0.65);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 8px 10px;
+  border-radius: 6px;
+  padding: 4px 8px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   transition: transform 0.15s ease, border-color 0.15s ease;
 }
 
@@ -711,9 +713,10 @@ html, body {
 
 .metric-big-num {
   font-family: var(--font-main);
-  font-size: clamp(1.2rem, 2vw, 1.45rem);
+  font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-white);
+  line-height: 1.1;
 }
 
 .metric-big-num.color-green {
@@ -757,22 +760,25 @@ html, body {
 .recognized-text-bar {
   background: #09152a;
   border: 1px solid #1e3a8a;
-  border-radius: 7px;
-  padding: 6px 10px;
+  border-radius: 5px;
+  padding: 3px 8px;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
 }
 
 .rec-symbol {
   font-weight: 800;
   color: var(--accent-cyan);
-  font-size: 0.78rem;
+  font-size: 0.68rem;
 }
 
 .rec-content {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rec-content strong {
@@ -783,6 +789,7 @@ html, body {
 .result-card-footer {
   display: flex;
   justify-content: flex-end;
+  margin-top: -2px;
 }
 
 .btn-next-sentence {
@@ -790,12 +797,13 @@ html, body {
   border: none;
   color: var(--accent-orange-bright);
   font-family: var(--font-main);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
+  padding: 1px 0;
   transition: transform 0.15s;
 }
 
