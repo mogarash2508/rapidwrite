@@ -22,16 +22,31 @@
 (function () {
   'use strict';
 
-  // --- Practice Prompts Library by Category with Calibrated Time Limits ---
-  const PROMPT_DATABASE = {
-    words: [
-      { text: "Woven silk pyjamas exchanged for blue quartz", diff: "Standard", time: 25, benchmarkCpm: 110 },
-      { text: "The quick brown fox jumps over the lazy dog", diff: "Easy", time: 18, benchmarkCpm: 90 },
-      { text: "Pack my box with five dozen liquor jugs before noon", diff: "Medium", time: 22, benchmarkCpm: 100 },
-      { text: "Sphinx of black quartz, judge my vow with steady precision", diff: "Hard", time: 28, benchmarkCpm: 120 },
-      { text: "Bright stars shine softly in the clear night sky", diff: "Easy", time: 16, benchmarkCpm: 80 },
-      { text: "Warm gentle rain falls quietly on green leaves", diff: "Easy", time: 16, benchmarkCpm: 80 }
+  // --- Verified Practice Prompts Partitioned by Word Length ---
+  const PROMPTS_BY_LENGTH = {
+    10: [
+      { text: "Quick brown foxes jump over lazy sleeping dogs without stopping.", time: 15, benchmarkCpm: 120 },
+      { text: "Bright stars shine quietly across the calm silent night sky.", time: 15, benchmarkCpm: 120 },
+      { text: "Fresh morning sunlight warms the peaceful green forest and hills.", time: 15, benchmarkCpm: 120 },
+      { text: "Practice daily with steady focus to build smooth cursive rhythm.", time: 15, benchmarkCpm: 120 },
+      { text: "Clear writing requires patient practice and uniform letter baseline alignment.", time: 15, benchmarkCpm: 120 }
     ],
+    25: [
+      { text: "Woven silk pyjamas were exchanged for blue quartz as the ambitious student practiced daily handwriting drills to achieve maximum fluency, speed, and elegance on glass.", time: 30, benchmarkCpm: 120 },
+      { text: "Sphinx of black quartz, judge my vow with steady precision and patient care while developing disciplined hand posture and consistent slant throughout every written line.", time: 30, benchmarkCpm: 120 },
+      { text: "Consistent practice, steady wrist posture, and relaxed finger pressure allow students to master handwriting speed, improve letter formation, and write with confident fluidity every day.", time: 30, benchmarkCpm: 120 },
+      { text: "Clear handwriting requires regular daily training, balanced grip tension, and rhythmic arm coordination to achieve high speed while keeping each letter distinct, legible, and neat.", time: 30, benchmarkCpm: 120 }
+    ],
+    50: [
+      { text: "Developing rapid handwriting requires consistent daily training, balanced pen pressure, and relaxed wrist movement. By maintaining steady baseline alignment, uniform letter slant, and disciplined spacing between words, any student can dramatically increase their writing speed while producing exceptionally neat script that remains effortless during classroom examinations or professional note taking.", time: 60, benchmarkCpm: 120 },
+      { text: "Mastering the art of fluid penmanship is an essential foundation for academic excellence and rapid cognitive expression. When fingers glide smoothly across paper with controlled speed and rhythmic cadence, thoughts flow unimpeded onto the page, creating an enduring impression of clarity, discipline, aesthetic refinement, and intellectual precision in every stroke.", time: 60, benchmarkCpm: 120 },
+      { text: "Diligent students who practice cursive handwriting every single day develop muscular memory, relaxed coordination, and superior stroke fluency. By focusing on steady letter sizing, smooth transitions, and uniform word spacing, writing becomes second nature, allowing students to complete timed essays and exam papers with exceptional speed, clarity, confidence, and grace.", time: 60, benchmarkCpm: 120 }
+    ]
+  };
+
+  // --- Practice Prompts Library by Category ---
+  const PROMPT_DATABASE = {
+    words: PROMPTS_BY_LENGTH[25],
     quote: [
       { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", diff: "Standard", time: 35, benchmarkCpm: 100 },
       { text: "To be yourself in a world constantly trying to make you someone else is an achievement.", diff: "Medium", time: 35, benchmarkCpm: 100 },
@@ -60,8 +75,9 @@
 
   // --- Session & Evaluation State ---
   let currentCategory = 'words';
+  let selectedLength = 25;
   let promptIndex = 0;
-  let activePrompt = PROMPT_DATABASE[currentCategory][promptIndex];
+  let activePrompt = PROMPTS_BY_LENGTH[25][0];
 
   // 5-Step Temporal Gating State
   let sessionArmed = false;         // Step 1: True when "Start" button is clicked
@@ -91,6 +107,8 @@
   let strictStylusOnly = true;
   let mouseDebug = true;
   let showRuledLines = true;
+  let showMetricsEnabled = true;
+  let countdownTimerEnabled = true;
   let rejectedPalmCount = 0;
 
   // DOM Elements
@@ -108,6 +126,16 @@
   const recognitionEngineBadge = document.getElementById('recognitionEngineBadge');
   const btnExpandResults = document.getElementById('btnExpandResults');
   const btnCloseResults = document.getElementById('btnCloseResults');
+
+  // Overall Performance Score Elements
+  const resOverallScore = document.getElementById('resOverallScore');
+  const resOverallGrade = document.getElementById('resOverallGrade');
+  const resSubSpeed = document.getElementById('resSubSpeed');
+  const resSubAccuracy = document.getElementById('resSubAccuracy');
+  const resSubAesthetic = document.getElementById('resSubAesthetic');
+
+  // 4 Primary Metric Elements
+  const resCpmValue = document.getElementById('resCpmValue');
   const resSpeedValue = document.getElementById('resSpeedValue');
   const resSpeedSub = document.getElementById('resSpeedSub');
   const resDurationValue = document.getElementById('resDurationValue');
@@ -153,7 +181,10 @@
   const btnCloseModal = document.getElementById('btnCloseModal');
   const chkStrictStylus = document.getElementById('chkStrictStylus');
   const chkRuledLines = document.getElementById('chkRuledLines');
-  const chkMouseDebug = document.getElementById('chkMouseDebug');
+  const chkShowMetrics = document.getElementById('chkShowMetrics');
+  const chkCountdownTimer = document.getElementById('chkCountdownTimer');
+  const btnThemeDark = document.getElementById('btnThemeDark');
+  const btnThemeLight = document.getElementById('btnThemeLight');
 
   // --- Notification Toast ---
   function showToast(message, type = 'info') {
@@ -179,8 +210,17 @@
   // =========================================================================
   // 1. PROMPT & CATEGORY MANAGEMENT
   // =========================================================================
+  function getActivePromptList() {
+    if (currentCategory === 'words') {
+      return PROMPTS_BY_LENGTH[selectedLength] || PROMPTS_BY_LENGTH[25];
+    }
+    return PROMPT_DATABASE[currentCategory] || PROMPTS_BY_LENGTH[25];
+  }
+
   function updatePromptDisplay() {
-    activePrompt = PROMPT_DATABASE[currentCategory][promptIndex];
+    const list = getActivePromptList();
+    if (promptIndex >= list.length) promptIndex = 0;
+    activePrompt = list[promptIndex];
     targetSentenceText.textContent = activePrompt.text;
     
     // Ensure sentence is visible on prompt change
@@ -202,21 +242,34 @@
       promptIndex = 0;
       updatePromptDisplay();
       clearCanvas(false);
+      showToast(`Category switched to: ${currentCategory}`, 'info');
     });
   });
 
-  // Length Pills
+  // Length Pills (10, 25, 50 words) - Programmatically load exact sentence length!
   document.querySelectorAll('.len-pill').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.len-pill').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      showToast(`Sentence preference set to ~${btn.dataset.len} words`, 'info');
+      selectedLength = parseInt(btn.dataset.len, 10);
+      currentCategory = 'words';
+
+      // Set words cat-pill to active
+      document.querySelectorAll('.cat-pill').forEach(b => {
+        if (b.dataset.cat === 'words') b.classList.add('active');
+        else b.classList.remove('active');
+      });
+
+      promptIndex = 0;
+      updatePromptDisplay();
+      clearCanvas(false);
+      showToast(`Loaded ${selectedLength}-word practice prompt (${activePrompt.time}s target)`, 'info');
     });
   });
 
   // Shuffle button
   btnShufflePrompt.addEventListener('click', () => {
-    const list = PROMPT_DATABASE[currentCategory];
+    const list = getActivePromptList();
     promptIndex = (promptIndex + 1) % list.length;
     updatePromptDisplay();
     clearCanvas(false);
@@ -225,7 +278,7 @@
 
   // Next sentence button (in results card)
   btnNextSentence.addEventListener('click', () => {
-    const list = PROMPT_DATABASE[currentCategory];
+    const list = getActivePromptList();
     promptIndex = (promptIndex + 1) % list.length;
     updatePromptDisplay();
     clearCanvas(false);
@@ -354,7 +407,7 @@
     lblStartSession.textContent = '● Armed (Write with Pen)';
     btnSubmitAnalyze.disabled = true; // Enabled on first stroke
 
-    lblInputStatus.textContent = 'Session Armed: Timer begins on first pen stroke';
+    if (lblInputStatus) lblInputStatus.textContent = 'Session Armed: Timer begins on first pen stroke';
     showToast('Step 1 Armed! Clock stationary at 00:00. Touch pen to canvas to start writing.', 'info');
   });
 
@@ -383,10 +436,9 @@
         timingHighlight.textContent = `${remainingSec}s countdown (${strokes.length} strokes)`;
       }
 
-      // CRITICAL: Complete Sentence Disappearance
-      if (remainingMs <= 0 && !sentenceExpired) {
+      // Complete Sentence Disappearance when countdown timer enabled
+      if (countdownTimerEnabled && remainingMs <= 0 && !sentenceExpired) {
         sentenceExpired = true;
-        // The sentence disappears completely from view
         targetSentenceText.classList.add('disappeared');
         promptExpiredNote.classList.remove('hidden');
         topTimerBadge.classList.add('warning');
@@ -448,7 +500,7 @@
         btnStartSession.classList.add('writing');
         lblStartSession.textContent = '✍ Writing Active';
         btnSubmitAnalyze.disabled = false; // Step 5 Stop button active
-        lblInputStatus.textContent = 'Apple Pencil Active (Recording)';
+        if (lblInputStatus) lblInputStatus.textContent = 'Apple Pencil Active (Recording)';
 
         startSessionTimer();
       }
@@ -739,7 +791,7 @@
     btnStartSession.classList.remove('armed', 'writing');
     lblStartSession.textContent = 'Start';
     btnSubmitAnalyze.disabled = true;
-    lblInputStatus.textContent = 'Click Start to begin session';
+    if (lblInputStatus) lblInputStatus.textContent = 'Click Start to begin session';
 
     redrawAllStrokes();
     updateStrokeTelemetry();
@@ -814,13 +866,13 @@
       btnPalmGuard.classList.remove('disabled');
       btnPalmGuard.classList.add('active');
       btnPalmGuard.innerHTML = '<span class="shield-icon">🛡</span><span>Palm Guard ON</span>';
-      lblInputStatus.textContent = 'Apple Pencil Only (Palm Guard ON)';
+      if (lblInputStatus) lblInputStatus.textContent = 'Apple Pencil Only (Palm Guard ON)';
       showToast('Strict Palm Rejection ON: Stylus writes, fingers scroll vertically', 'info');
     } else {
       btnPalmGuard.classList.remove('active');
       btnPalmGuard.classList.add('disabled');
       btnPalmGuard.innerHTML = '<span class="shield-icon">⚠️</span><span>Palm Guard OFF</span>';
-      lblInputStatus.textContent = 'Stylus + Touch / Mouse Active';
+      if (lblInputStatus) lblInputStatus.textContent = 'Stylus + Touch / Mouse Active';
       showToast('Palm Guard OFF: Touch gestures will now leave marks', 'warning');
     }
   });
@@ -843,7 +895,7 @@
     showToast('Toggled Results Display', 'info');
   });
 
-  // Settings Modal
+  // Settings Modal & Preferences
   btnSettings.addEventListener('click', () => {
     settingsModal.classList.remove('hidden');
   });
@@ -858,19 +910,72 @@
     }
   });
 
-  chkStrictStylus.addEventListener('change', (e) => {
-    strictStylusOnly = e.target.checked;
-    btnPalmGuard.click();
-  });
+  // Theme Customization with localStorage persistence
+  function applyTheme(theme) {
+    if (theme === 'light') {
+      document.body.classList.remove('dark-theme');
+      document.body.classList.add('light-theme');
+      if (btnThemeLight) btnThemeLight.classList.add('active');
+      if (btnThemeDark) btnThemeDark.classList.remove('active');
+    } else {
+      document.body.classList.remove('light-theme');
+      document.body.classList.add('dark-theme');
+      if (btnThemeDark) btnThemeDark.classList.add('active');
+      if (btnThemeLight) btnThemeLight.classList.remove('active');
+    }
+    try {
+      localStorage.setItem('rapidwrite_theme', theme);
+    } catch (e) {}
+  }
 
-  chkRuledLines.addEventListener('change', (e) => {
-    showRuledLines = e.target.checked;
-    drawPaperGuides();
-  });
+  if (btnThemeDark) {
+    btnThemeDark.addEventListener('click', () => {
+      applyTheme('dark');
+      showToast('Dark Theme activated', 'info');
+    });
+  }
 
-  chkMouseDebug.addEventListener('change', (e) => {
-    mouseDebug = e.target.checked;
-  });
+  if (btnThemeLight) {
+    btnThemeLight.addEventListener('click', () => {
+      applyTheme('light');
+      showToast('Light Theme activated', 'info');
+    });
+  }
+
+  // Load saved theme preference
+  const savedTheme = localStorage.getItem('rapidwrite_theme') || 'dark';
+  applyTheme(savedTheme);
+
+  if (chkStrictStylus) {
+    chkStrictStylus.addEventListener('change', (e) => {
+      strictStylusOnly = e.target.checked;
+      btnPalmGuard.click();
+    });
+  }
+
+  if (chkRuledLines) {
+    chkRuledLines.addEventListener('change', (e) => {
+      showRuledLines = e.target.checked;
+      drawPaperGuides();
+    });
+  }
+
+  if (chkShowMetrics) {
+    chkShowMetrics.addEventListener('change', (e) => {
+      showMetricsEnabled = e.target.checked;
+    });
+  }
+
+  if (chkCountdownTimer) {
+    chkCountdownTimer.addEventListener('change', (e) => {
+      countdownTimerEnabled = e.target.checked;
+      if (!countdownTimerEnabled) {
+        targetSentenceText.classList.remove('disappeared');
+        promptExpiredNote.classList.add('hidden');
+        sentenceExpired = false;
+      }
+    });
+  }
 
   // =========================================================================
   // 7. STEP 5: STOP & ANALYZE (WRITING DURATION = T_last stroke - T_first stroke)
@@ -953,16 +1058,55 @@
       // Actual Speed Calculation based on Writing Duration = T_last - T_first
       const targetCharCount = targetText.length;
       const writtenCharsCount = recognizedText.replace(/\s+/g, '').length || targetCharCount;
-      const actualCpm = (writtenCharsCount / writingDurationSec) * 60.0;
+      const actualCps = writtenCharsCount / writingDurationSec;
+      const actualCpm = actualCps * 60.0;
       const actualWpm = actualCpm / 5.0;
 
-      // Holistic Calligraphy Aesthetic Evaluation
+      // Speed Score (0-100) relative to target benchmark
+      const benchmarkCpm = activePrompt.benchmarkCpm || 120;
+      const speedScore = Math.min(100, Math.max(15, Math.round((actualCpm / benchmarkCpm) * 100)));
+
+      // Accuracy Score (0-100) combining Character Accuracy and Word Accuracy
+      const charAcc = Math.round(acc.overallAccuracy || 0);
+      const wordAcc = Math.round(acc.wordAccuracy || charAcc);
+      const accuracyScore = Math.min(100, Math.max(0, Math.round(0.70 * charAcc + 0.30 * wordAcc)));
+
+      // Holistic Calligraphy Aesthetic Evaluation (0-100)
       const aestheticResult = computeAestheticScore(strokes);
+      const aestheticScore = aestheticResult.score;
 
-      // Populate Streamlined Result Cards (WPM | DURATION | ACCURACY | AESTHETIC)
-      resSpeedValue.textContent = actualWpm.toFixed(1);
-      resSpeedSub.textContent = `${Math.round(actualCpm)} CPM`;
+      // Overall Handwriting Performance Score (Formula: 40% Speed + 35% Accuracy + 25% Aesthetics)
+      const overallScore = Math.min(100, Math.max(0, Math.round(
+        0.40 * speedScore + 
+        0.35 * accuracyScore + 
+        0.25 * aestheticScore
+      )));
 
+      // Overall Performance Grade
+      let overallGrade = 'D';
+      if (overallScore >= 95) overallGrade = 'A+';
+      else if (overallScore >= 88) overallGrade = 'A';
+      else if (overallScore >= 80) overallGrade = 'B+';
+      else if (overallScore >= 72) overallGrade = 'B';
+      else if (overallScore >= 65) overallGrade = 'C+';
+      else if (overallScore >= 55) overallGrade = 'C';
+
+      // 1. Populate Overall Performance Score Hero
+      if (resOverallScore) resOverallScore.textContent = overallScore;
+      if (resOverallGrade) resOverallGrade.textContent = `GRADE ${overallGrade}`;
+      if (resSubSpeed) resSubSpeed.textContent = `${speedScore}/100`;
+      if (resSubAccuracy) resSubAccuracy.textContent = `${accuracyScore}/100`;
+      if (resSubAesthetic) resSubAesthetic.textContent = `${aestheticScore}/100`;
+
+      // 2. Populate 4 Primary Metric Cards:
+      // CPM (Speed)
+      if (resCpmValue) resCpmValue.textContent = Math.round(actualCpm);
+      if (resSpeedValue) resSpeedValue.textContent = actualWpm.toFixed(1);
+      if (resSpeedSub) {
+        resSpeedSub.textContent = `CPS: ${actualCps.toFixed(2)} char/s • ${actualWpm.toFixed(1)} WPM`;
+      }
+
+      // Duration
       if (resDurationValue) {
         resDurationValue.textContent = writingDurationSec.toFixed(2);
       }
@@ -970,22 +1114,40 @@
         resDurationSub.textContent = `Contact: ${contactTimeSec.toFixed(1)}s • In-Air: ${hoverTimeSec.toFixed(1)}s`;
       }
 
-      resAccuracyValue.textContent = `${acc.overallAccuracy}`;
-      resAccuracySub.textContent = `${acc.matches} / ${targetCharCount} characters matched`;
+      // Accuracy
+      if (resAccuracyValue) {
+        resAccuracyValue.textContent = `${charAcc}`;
+      }
+      if (resAccuracySub) {
+        resAccuracySub.textContent = `Char: ${charAcc}% • Word: ${wordAcc}% (${acc.matches}/${targetCharCount} chars)`;
+      }
 
-      resAestheticGrade.textContent = aestheticResult.grade;
-      resAestheticScore.textContent = `Grade (${aestheticResult.score}/100)`;
-      resAestheticSub.textContent = aestheticResult.summary;
+      // Aesthetic
+      if (resAestheticGrade) {
+        resAestheticGrade.textContent = aestheticResult.grade;
+      }
+      if (resAestheticScore) {
+        resAestheticScore.textContent = `Grade (${aestheticScore}/100)`;
+      }
+      if (resAestheticSub) {
+        resAestheticSub.textContent = aestheticResult.summary;
+      }
 
-      resRecognizedText.textContent = `"${recognizedText}"`;
-      recognitionEngineBadge.textContent = engineName;
+      if (resRecognizedText) {
+        resRecognizedText.textContent = `"${recognizedText}"`;
+      }
+      if (recognitionEngineBadge) {
+        recognitionEngineBadge.textContent = engineName;
+      }
 
-      // Reveal Result Analysis Card smoothly
-      resultAnalysisCard.classList.remove('collapsed');
-      lblToggleResults.textContent = 'Hide Results';
-      resultAnalysisCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      // Reveal Result Analysis Card smoothly if metrics enabled
+      if (showMetricsEnabled) {
+        resultAnalysisCard.classList.remove('collapsed');
+        lblToggleResults.textContent = 'Hide Results';
+        resultAnalysisCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
 
-      showToast(`Evaluation Complete! Speed: ${actualWpm.toFixed(1)} WPM (Duration: ${writingDurationSec.toFixed(2)}s)`, 'info');
+      showToast(`Evaluation Complete! Overall Score: ${overallScore}/100 (Speed: ${Math.round(actualCpm)} CPM • ${actualCps.toFixed(2)} CPS)`, 'info');
 
     } catch (err) {
       console.error('Analysis error:', err);

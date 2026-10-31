@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-  <title>Stylus Handwriting Evaluator — Rapid Write</title>
+  <title>RapidWrite — Handwriting Evaluator & Speed Trainer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -13,16 +13,16 @@
 <body class="dark-theme">
   <div class="app-container">
 
-    <!-- 1. TOP HEADER (Aurora Ink, Title, Live Timer at Top Right, Settings) -->
+    <!-- 1. TOP HEADER (RapidWrite Branding & Motivating Tagline) -->
     <header class="app-header">
       <div class="header-left">
         <div class="badge-aurora">
-          <span class="aurora-sparkle">✦</span>
-          <span>Aurora Ink</span>
+          <span class="aurora-sparkle">⚡</span>
+          <span>RapidWrite</span>
         </div>
         <div class="title-wrap">
-          <h1>Stylus Handwriting Evaluator</h1>
-          <p class="subtitle">Tablet-optimized calligraphy & kinematics assessment</p>
+          <h1>RapidWrite</h1>
+          <p class="subtitle">Write Faster. Write Better. Get Better Every Day.</p>
         </div>
       </div>
 
@@ -115,7 +115,7 @@
       </div>
     </section>
 
-    <!-- 4. STREAMLINED RESULT ANALYSIS CARD (Matching Speaker's Reference) -->
+    <!-- 4. STREAMLINED RESULT ANALYSIS CARD -->
     <section class="result-analysis-card" id="resultAnalysisCard">
       <div class="result-card-header">
         <div class="header-tag-group">
@@ -125,7 +125,6 @@
             </svg>
           </div>
           <h2 class="analysis-title">RESULT ANALYSIS</h2>
-          <span class="engine-badge" id="recognitionEngineBadge">Google Digital Ink (Web Engine)</span>
         </div>
 
         <div class="header-action-group">
@@ -146,19 +145,45 @@
         </div>
       </div>
 
-      <!-- 4 High-Impact Metric Cards: WPM | DURATION | ACCURACY | AESTHETIC -->
+      <!-- OVERALL PERFORMANCE SCORE HERO -->
+      <div class="overall-performance-hero" id="overallPerformanceHero">
+        <div class="overall-score-left">
+          <div class="overall-hero-badge">OVERALL PERFORMANCE SCORE</div>
+          <div class="overall-hero-score-row">
+            <span class="overall-score-big" id="resOverallScore">92</span>
+            <span class="overall-score-max">/ 100</span>
+            <span class="overall-badge-grade" id="resOverallGrade">GRADE A</span>
+          </div>
+        </div>
+        <div class="overall-breakdown-tags">
+          <div class="score-breakdown-chip chip-speed">
+            <span class="chip-label">Speed (40%)</span>
+            <span class="chip-val" id="resSubSpeed">95/100</span>
+          </div>
+          <div class="score-breakdown-chip chip-accuracy">
+            <span class="chip-label">Accuracy (35%)</span>
+            <span class="chip-val" id="resSubAccuracy">90/100</span>
+          </div>
+          <div class="score-breakdown-chip chip-aesthetic">
+            <span class="chip-label">Aesthetics (25%)</span>
+            <span class="chip-val" id="resSubAesthetic">88/100</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 High-Impact Metric Cards: CPM (Speed) | DURATION | ACCURACY | AESTHETIC -->
       <div class="metrics-four-cards">
-        <!-- Metric 1: WPM -->
+        <!-- Metric 1: CPM (Primary Speed Measurement) -->
         <div class="metric-card card-speed">
           <div class="metric-head">
             <span class="icon-stat icon-bolt">⚡</span>
-            <span class="metric-label">WPM</span>
+            <span class="metric-label">CPM (SPEED)</span>
           </div>
           <div class="metric-value-wrap">
-            <span class="metric-big-num" id="resSpeedValue">25.0</span>
-            <span class="metric-unit">WPM</span>
+            <span class="metric-big-num" id="resCpmValue">125</span>
+            <span class="metric-unit">CPM</span>
           </div>
-          <div class="metric-footer-note" id="resSpeedSub">125 CPM</div>
+          <div class="metric-footer-note" id="resSpeedSub">CPS: 2.08 char/s • 25.0 WPM</div>
         </div>
 
         <!-- Metric 2: DURATION (Grounded Temporal Gating Model) -->
@@ -184,7 +209,7 @@
             <span class="metric-big-num color-green" id="resAccuracyValue">82</span>
             <span class="metric-unit color-green">%</span>
           </div>
-          <div class="metric-footer-note" id="resAccuracySub">36 / 44 characters matched</div>
+          <div class="metric-footer-note" id="resAccuracySub">Char: 82% • Word: 80% (36/44 chars)</div>
         </div>
 
         <!-- Metric 4: Aesthetic -->
@@ -197,7 +222,7 @@
             <span class="metric-big-num color-amber" id="resAestheticGrade">C+</span>
             <span class="metric-unit color-amber" id="resAestheticScore">Grade (69/100)</span>
           </div>
-          <div class="metric-footer-note" id="resAestheticSub">Fluid curvature & rhythm</div>
+          <div class="metric-footer-note" id="resAestheticSub">Fluid curvature &amp; rhythm</div>
         </div>
       </div>
 
@@ -341,12 +366,6 @@
     <main class="notepad-scroll-container" id="notepadScrollContainer">
       <div class="notepad-sheet-frame" id="notepadSheetFrame">
         
-        <!-- Floating Top-Right Badge: Apple Pencil Only (Palm Guard ON) -->
-        <div class="canvas-floating-badge badge-top-right" id="badgeApplePencil">
-          <span class="stylus-dot-icon">✏</span>
-          <span id="lblInputStatus">Apple Pencil Only (Palm Guard ON)</span>
-        </div>
-
         <!-- Floating Bottom-Left Badge: Stroke Counter -->
         <div class="canvas-floating-badge badge-bottom-left" id="badgeStrokeCount">
           <span>✍</span>
@@ -363,39 +382,63 @@
 
   </div>
 
-  <!-- Settings & QR Modal -->
+  <!-- Redesigned Settings & Customization Modal -->
   <div class="modal-overlay hidden" id="settingsModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3>Studio Settings &amp; Telemetry</h3>
+        <h3>Settings &amp; Preferences</h3>
         <button type="button" class="btn-modal-close" id="btnCloseModal">✕</button>
       </div>
       <div class="modal-body">
-        <div class="setting-item">
-          <div>
-            <strong>Strict Stylus-Only Palm Rejection</strong>
-            <p>Reject all finger touches from drawing (allows vertical touch scrolling)</p>
+        <!-- 1. Theme Customization -->
+        <div class="modal-setting-section">
+          <div class="modal-section-title">THEME CUSTOMIZATION</div>
+          <div class="theme-switch-row">
+            <button type="button" class="theme-select-btn active" id="btnThemeDark" data-theme="dark">
+              <span>🌙</span> Dark Theme
+            </button>
+            <button type="button" class="theme-select-btn" id="btnThemeLight" data-theme="light">
+              <span>☀️</span> Light Theme
+            </button>
           </div>
-          <input type="checkbox" id="chkStrictStylus" checked>
         </div>
-        <div class="setting-item">
-          <div>
-            <strong>Show Ruled Notebook Lines</strong>
-            <p>Display calibrated writing guidelines on notepad</p>
+
+        <!-- 2. Handwriting Canvas Settings -->
+        <div class="modal-setting-section">
+          <div class="modal-section-title">HANDWRITING CANVAS</div>
+          <div class="setting-item">
+            <div>
+              <strong>Show Ruled Guidelines</strong>
+              <p>Display calibrated writing guidelines on notepad</p>
+            </div>
+            <input type="checkbox" id="chkRuledLines" checked>
           </div>
-          <input type="checkbox" id="chkRuledLines" checked>
-        </div>
-        <div class="setting-item">
-          <div>
-            <strong>Desktop Mouse Debug Drawing</strong>
-            <p>Allow mouse clicks to draw when testing on desktop laptop</p>
+          <div class="setting-item">
+            <div>
+              <strong>Strict Palm Rejection</strong>
+              <p>Stylus exclusively draws ink; finger touches enable smooth scrolling</p>
+            </div>
+            <input type="checkbox" id="chkStrictStylus" checked>
           </div>
-          <input type="checkbox" id="chkMouseDebug" checked>
         </div>
-        <div class="qr-connection-box">
-          <strong>Connect iPad or Tablet:</strong>
-          <p>Scan to open this live session on your tablet via Cloudflare Tunnel:</p>
-          <img src="qr_code.png" alt="Cloudflare QR Code" class="modal-qr-img">
+
+        <!-- 3. Assessment & Metrics Settings -->
+        <div class="modal-setting-section">
+          <div class="modal-section-title">ASSESSMENT &amp; METRICS</div>
+          <div class="setting-item">
+            <div>
+              <strong>Show Performance Results</strong>
+              <p>Display full speed, accuracy and aesthetics breakdown after submission</p>
+            </div>
+            <input type="checkbox" id="chkShowMetrics" checked>
+          </div>
+          <div class="setting-item">
+            <div>
+              <strong>Prompt Countdown Timer</strong>
+              <p>Enforce fixed sentence display duration before prompt vanishes</p>
+            </div>
+            <input type="checkbox" id="chkCountdownTimer" checked>
+          </div>
         </div>
       </div>
     </div>
